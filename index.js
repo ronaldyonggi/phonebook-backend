@@ -41,6 +41,24 @@ app.get('/info', (request, response) => {
    <br/> <br/> ${new Date()} `)
 })
 
+// Individual persons route
+app.get('/api/persons/:id', (request, response) => {
+  const requestId = Number(request.params.id)
+  const matchingPerson = persons.find(person => person.id === requestId)
+
+  // If a match is found, respond with that person's json
+  if (matchingPerson) {
+    response
+      .status(200)
+      .json(matchingPerson)
+  } else {
+      response
+        .status(404)
+        .json({error: "person not found!"})
+  }
+
+})
+
 // Listening to PORT
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`)
