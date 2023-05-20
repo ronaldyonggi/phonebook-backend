@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 const PORT = 3001
 
+app.use(express.json())
+
 let persons = [
   { 
     "id": 1,
@@ -24,6 +26,11 @@ let persons = [
     "number": "39-23-6423122"
   }
 ]
+
+// Generate a random integer between between 100 to 9999
+const generateRandomInt = () => {
+  return Math.floor(Math.random() * (9990 - 100) + 100) 
+}
 
 // Home page route
 app.get('/', (request, response) => {
@@ -69,6 +76,48 @@ app.delete('/api/persons/:id', (request, response) => {
   response
     .status(204)
     .end()
+})
+
+// Add a new person
+app.post('/api/persons', (request, response) => {
+  const body = request.body
+
+  // If name or number is missing, send error
+  if (!body.name) {
+    return response
+            .status(400)
+            .json({error: "name is missing!"})
+  } else if (!body.number) {
+    return response
+            .status(400)
+            .json({error: "number is missing!"})
+  }
+
+  // If a duplicate name is found, send error
+  const requestName = request.body.name
+  let duplicateExist = false
+  persons.forEach(person => {
+    if (person.name === requestName) {
+      duplicateExist = true
+    }
+  })
+
+  if (duplicateExist) {
+    return response
+            .status(400)
+            .json({error: "name must be unique"})
+  } else {
+    // Otherwise add the new person to persons
+    const newPerson = {
+      id: generateRandomInt(),
+      name: requestName,
+      number: request.body.number
+    }
+
+    persons.push(newPerson)
+    response
+      .json(newPerson)
+    }
 })
 
 // Listening to PORT
