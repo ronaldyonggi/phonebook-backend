@@ -35,6 +35,12 @@ app.get('/api/persons', (request, response) => {
   response.json(persons)
 })
 
+// Info page route
+app.get('/info', (request, response) => {
+  response.send(`Phonebook has info for ${persons.length} people
+   <br/> <br/> ${new Date()} `)
+})
+
 // Listening to PORT
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`)
