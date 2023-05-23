@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 
 // Create a new token for morgan
 morgan.token('body', (req, res) => {
