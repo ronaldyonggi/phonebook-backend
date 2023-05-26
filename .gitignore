@@ -7,7 +7,6 @@ scripts/flow/*/.flowconfig
 .grunt
 _SpecRunner.html
 __benchmarks__
-build/
 remote-repo/
 coverage/
 .module-cache
@@ -23,6 +22,11 @@ chrome-user-data
 .vscode
 *.swp
 *.swo
+*.toml
+Dockerfile
+.dockerignore
+*.rest
+*.env
 
 packages/react-devtools-core/dist
 packages/react-devtools-extensions/chrome/build
