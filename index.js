@@ -2,21 +2,12 @@
 require('dotenv').config()
 
 const express = require('express')
-const mongoose = require('mongoose')
 const app = express()
 // const morgan = require('morgan')
 const cors = require('cors')
 const PORT = process.env.PORT || 3001
 const {unknownEndpoint, errorHandler} = require('./middlewares')
-const isValidId = require('./utils')
 const Person = require('./models/Person')
-const mongo_url = process.env.MONGO_URI
-mongoose.set('strictQuery', false)
-
-mongoose
-  .connect(mongo_url)
-  .then(() => console.log(`connected to DB`))
-  .catch(error => console.log(`Error connecting to DB: ${error}`))
 
 // Create a new token for morgan
 // morgan.token('body', (req, res) => {
@@ -34,11 +25,11 @@ app.get('/', (request, response) => {
 })
 
 // Get all Persons
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
   Person
     .find({})
     .then(allPerson => response.json(allPerson))
-    .catch(() => response.send(404))
+    .catch(error => next(error))
 })
 
 // Info page route
@@ -48,44 +39,30 @@ app.get('/info', (request, response) => {
 })
 
 // Individual persons route
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
-  // If the id format is not valid, send response 400
-  if (!isValidId(id)) {
-    response.status(400).send({error: 'bad id format!'})
-  }
-  else {
-    Person.findById(id)
-          .then(match => {
-            // If a match is found, then respond with the found person
-            if (match) response.json(match)
-            // Otherwise no matching id 
-            else response.status(404).end()
-          })
-          .catch(error => {
-            console.log(error)
-            response.status(500).end()
-          })
-    }
+
+  Person.findById(id)
+        .then(match => {
+          // If a match is found, then respond with the found person
+          if (match) response.json(match)
+          // Otherwise no matching id 
+          else response.status(404).end()
+        })
+        .catch(error => next(error))
 })
 
 // Delete a person
 app.delete('/api/persons/:id', (request, response, next) => {
-  const id = request.params.id
-
-  if (!isValidId(id)) {
-    response.status(400).send({error: 'bad id format!'})
-  } else {
-    Person
-      .findByIdAndDelete(request.params.id)
-      .then(deleted => {
-        // if a person is successfully found and deleted
-        if (deleted) response.status(204).end()
-        // Otherwise no id match is found. Response 404
-        else response.status(404).end()
-      })
-      .catch(error => next(error))
-  }
+  Person
+    .findByIdAndDelete(request.params.id)
+    .then(deleted => {
+      // if a person is successfully found and deleted
+      if (deleted) response.status(204).end()
+      // Otherwise no id match is found. Response 404
+      else response.status(404).end()
+    })
+    .catch(error => next(error))
 })
 
 // Add a new person
@@ -114,7 +91,7 @@ app.put('/api/persons/:id', (request, response, next) => {
   }
 
   Person
-    .findByIdAndUpdate(id, updatedPerson, { new: true})
+    .findByIdAndUpdate(id, updatedPerson, {new: true})
     .then(result => response.json(result))
     .catch(error => next(error))
 })
