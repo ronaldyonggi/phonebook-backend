@@ -6,7 +6,7 @@ const app = express()
 // const morgan = require('morgan')
 const cors = require('cors')
 const PORT = process.env.PORT || 3001
-const {unknownEndpoint, errorHandler} = require('./middlewares')
+const { unknownEndpoint, errorHandler } = require('./middlewares')
 const Person = require('./models/Person')
 
 // Create a new token for morgan
@@ -34,8 +34,12 @@ app.get('/api/persons', (request, response, next) => {
 
 // Info page route
 app.get('/info', (request, response) => {
-  response.send(`Phonebook has info for ${persons.length} people
-   <br/> <br/> ${new Date()} `)
+  Person
+    .find({})
+    .then (allPerson => {
+      response.send(`Phonebook has info for ${allPerson.length} people
+      <br/> <br/> ${new Date()} `)
+    })
 })
 
 // Individual persons route
@@ -43,13 +47,13 @@ app.get('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
 
   Person.findById(id)
-        .then(match => {
-          // If a match is found, then respond with the found person
-          if (match) response.json(match)
-          // Otherwise no matching id 
-          else response.status(404).end()
-        })
-        .catch(error => next(error))
+    .then(match => {
+      // If a match is found, then respond with the found person
+      if (match) response.json(match)
+      // Otherwise no matching id
+      else response.status(404).end()
+    })
+    .catch(error => next(error))
 })
 
 // Delete a person
@@ -91,7 +95,7 @@ app.put('/api/persons/:id', (request, response, next) => {
   }
 
   Person
-    .findByIdAndUpdate(id, updatedPerson, {new: true})
+    .findByIdAndUpdate(id, updatedPerson, { new: true })
     .then(result => response.json(result))
     .catch(error => next(error))
 })
